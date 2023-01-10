@@ -17,44 +17,6 @@ module.exports.login = async (req, res, next) => {
   }
 };
 
-module.exports.checkUsername = async (req, res, next) => {
-  try {
-    const { username } = req.body;
-    const user = await User.findOne({ username });
-    if (user) {
-      return res.json({
-        status: false,
-        msg: "Username unavailable.",
-      });
-    } else {
-      return res.json({
-        status: true,
-        msg: "Username available.",
-      });
-    }
-  } catch (err) {
-    next(err);
-  }
-};
-
-module.exports.firebaseLogin = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
-      delete user.password;
-      return res.json({ status: true, user });
-    } else {
-      return res.json({
-        status: false,
-        msg: "Email not found in database, welcome new user.",
-      });
-    }
-  } catch (ex) {
-    next(ex);
-  }
-};
-
 module.exports.register = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
