@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
+
 import { useNavigate, Link } from "react-router-dom";
 import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginRoute } from "../utils/APIRoutes";
+import SocialLoginButtons from "../components/SocialLoginButtons";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -82,7 +84,10 @@ export default function Login() {
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Log In</button>
+          <button type="submit" className="btn">
+            Log In
+          </button>
+          <SocialLoginButtons />
           <span>
             Don't have an account ? <Link to="/register">Create One.</Link>
           </span>
@@ -137,7 +142,7 @@ const FormContainer = styled.div`
       outline: none;
     }
   }
-  button {
+  .btn {
     background-color: #4e0eff;
     color: white;
     padding: 1rem 2rem;
@@ -151,6 +156,7 @@ const FormContainer = styled.div`
       background-color: #4e0eff;
     }
   }
+
   span {
     color: white;
     text-transform: uppercase;
