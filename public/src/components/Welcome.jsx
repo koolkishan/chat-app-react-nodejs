@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Robot from "../assets/robot.gif";
+import Robot from "../assets/welcome_transparent.gif";
 export default function Welcome() {
   const [userName, setUserName] = useState("");
   useEffect(async () => {

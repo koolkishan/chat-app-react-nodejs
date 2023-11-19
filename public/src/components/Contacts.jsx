@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Logo from "../assets/logo.svg";
-
+import SearchComponent from "./SearchComponent";
 export default function Contacts({ contacts, changeChat }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
+  const [text, setText] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState(contacts);
+
+
   useEffect(async () => {
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
@@ -17,16 +20,28 @@ export default function Contacts({ contacts, changeChat }) {
     setCurrentSelected(index);
     changeChat(contact);
   };
+
+  useEffect(() => {
+    if (text === '') {
+      setFilteredContacts(contacts);
+    } else {
+      const filtered = contacts.filter((contact) =>
+        contact.username.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredContacts(filtered);
+    }
+  }, [text, contacts]);
+
+
   return (
     <>
       {currentUserImage && currentUserImage && (
         <Container>
           <div className="brand">
-            <img src={Logo} alt="logo" />
-            <h3>snappy</h3>
+            <SearchComponent setText={setText}/>
           </div>
           <div className="contacts">
-            {contacts.map((contact, index) => {
+            {filteredContacts.map((contact, index)=> {
               return (
                 <div
                   key={contact._id}
@@ -64,23 +79,26 @@ export default function Contacts({ contacts, changeChat }) {
     </>
   );
 }
+
+// const SearchStyled=styled.div`
+
+//   display: flex;
+//   align-items: flex-start;
+//   justify-content: flex-start;
+//   height: 100vh;
+//   padding: 20px; 
+// `;
 const Container = styled.div`
   display: grid;
   grid-template-rows: 10% 75% 15%;
   overflow: hidden;
   background-color: #080420;
   .brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: center;
-    img {
-      height: 2rem;
-    }
-    h3 {
-      color: white;
-      text-transform: uppercase;
-    }
+    padding-top: 10px;
+    padding-left: 16px;
+    display: grid;
+    align-self: start; 
+    justify-self: start;
   }
   .contacts {
     display: flex;
@@ -150,3 +168,5 @@ const Container = styled.div`
     }
   }
 `;
+
+
