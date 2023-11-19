@@ -1,7 +1,6 @@
 {
   "name": "chat-app-backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
@@ -17,5 +16,6 @@
     "mongoose": "^6.2.1",
     "nodemon": "^2.0.15",
     "socket.io": "^4.4.1"
-  }
+  },
+  "description": ""
 }
