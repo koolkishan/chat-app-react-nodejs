@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  front:
+    build: ./public
+    ports:
+      - 3000:3000
+  api:
+    build: ./server
+    ports:
+      - 5000:5000
