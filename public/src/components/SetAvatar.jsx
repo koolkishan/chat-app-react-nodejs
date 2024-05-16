@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { setAvatarRoute } from "../utils/APIRoutes";
+import userById from "../utils/backendCall";
 export default function SetAvatar() {
   const api = `https://api.multiavatar.com/4645646`;
   const navigate = useNavigate();
@@ -21,29 +22,40 @@ export default function SetAvatar() {
     theme: "dark",
   };
 
-  useEffect(async () => {
-    if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY))
+  useEffect(() => {
+    if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/login");
+    }
   }, []);
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
       toast.error("Please select an avatar", toastOptions);
     } else {
-      const user = await JSON.parse(
-        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      const user = await userById();
+      const { data } = await axios.post(
+        `${setAvatarRoute}/${user._id}`,
+        {
+          image: avatars[selectedAvatar],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem(
+              process.env.REACT_APP_LOCALHOST_KEY
+            )}`,
+          },
+        }
       );
-
-      const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
-        image: avatars[selectedAvatar],
-      });
 
       if (data.isSet) {
         user.isAvatarImageSet = true;
         user.avatarImage = data.image;
         localStorage.setItem(
-          process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(user)
+          "ImageInfo",
+          JSON.stringify({
+            isAvatarSet: user.isAvatarImageSet,
+            avatarImage: user.avatarImage,
+          })
         );
         navigate("/");
       } else {
@@ -52,17 +64,20 @@ export default function SetAvatar() {
     }
   };
 
-  useEffect(async () => {
-    const data = [];
-    for (let i = 0; i < 4; i++) {
-      const image = await axios.get(
-        `${api}/${Math.round(Math.random() * 1000)}`
-      );
-      const buffer = new Buffer(image.data);
-      data.push(buffer.toString("base64"));
+  useEffect(() => {
+    async function fetchData() {
+      const data = [];
+      for (let i = 0; i < 4; i++) {
+        const image = await axios.get(
+          `${api}/${Math.round(Math.random() * 1000)}`
+        );
+        const buffer = new Buffer(image.data);
+        data.push(buffer.toString("base64"));
+      }
+      setAvatars(data);
+      setIsLoading(false);
     }
-    setAvatars(data);
-    setIsLoading(false);
+    fetchData();
   }, []);
   return (
     <>

@@ -7,6 +7,7 @@ import { allUsersRoute, host } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
+import userById from "../utils/backendCall";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -14,17 +15,19 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  useEffect(async () => {
-    if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/login");
-    } else {
-      setCurrentUser(
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )
-      );
+  useEffect(() => {
+    async function fetchData() {
+      if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
+        navigate("/login");
+      } else {
+        const user = await userById();
+        setCurrentUser(user);
+      }
     }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
@@ -32,16 +35,27 @@ export default function Chat() {
     }
   }, [currentUser]);
 
-  useEffect(async () => {
-    if (currentUser) {
-      if (currentUser.isAvatarImageSet) {
-        const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-        setContacts(data.data);
-      } else {
-        navigate("/setAvatar");
+  useEffect(() => {
+    async function fetchData() {
+      if (currentUser) {
+        if (currentUser.isAvatarImageSet) {
+          const data = await axios.get(`${allUsersRoute}/${currentUser._id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem(
+                process.env.REACT_APP_LOCALHOST_KEY
+              )}`,
+            },
+          });
+          setContacts(data.data);
+        } else {
+          navigate("/setAvatar");
+        }
       }
     }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
+
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
   };
