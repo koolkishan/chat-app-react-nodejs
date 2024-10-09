@@ -25,11 +25,26 @@ module.exports.getMessages = async (req, res, next) => {
 module.exports.addMessage = async (req, res, next) => {
   try {
     const { from, to, message } = req.body;
-    const data = await Messages.create({
-      message: { text: message },
-      users: [from, to],
-      sender: from,
-    });
+    console.log(message)
+    let data;
+    if(!req.file){
+       data = await Messages.create({
+        message: { text: message.msg },
+        users: [from, to],
+        sender: from,
+        
+      });
+      
+    }
+    else{
+       data = await Messages.create({
+        message: { text: message.msg },
+        users: [from, to],
+        sender: from,
+        fileUrl: `/uploads/${req.file.filename}`
+        
+      });
+    }
 
     if (data) return res.json({ msg: "Message added successfully." });
     else return res.json({ msg: "Failed to add message to the database" });
