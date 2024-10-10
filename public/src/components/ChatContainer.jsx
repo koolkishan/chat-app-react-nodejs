@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import ChatInput from "./ChatInput";
+import ChatInput, { ChatMessage } from "./ChatInput";
 import Logout from "./Logout";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -20,6 +20,7 @@ export default function ChatContainer({ currentChat, socket }) {
       to: currentChat._id,
     });
     setMessages(response.data);
+    console.log(response.data);
   }, [currentChat]);
 
   useEffect(() => {
@@ -49,8 +50,7 @@ export default function ChatContainer({ currentChat, socket }) {
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message });
-    console.log(msgs)
+    msgs.push({ fromSelf: true, message: message });
     setMessages(msgs);
   };
 
@@ -118,7 +118,7 @@ export default function ChatContainer({ currentChat, socket }) {
         <Logout />
       </div>
       <div className="chat-messages">
-        {messages.map((message) => {
+      {messages.map((message) => {
           return (
             <div ref={scrollRef} key={uuidv4()}>
               <div
@@ -127,16 +127,16 @@ export default function ChatContainer({ currentChat, socket }) {
                 }`}
               >
                 <div className="content ">
-                  {message.fileUrl ? (
-                    <a href={message.fileUrl} target="_blank" rel="noopener noreferrer">
-                      {message.fileUrl.endsWith(".png") || message.fileUrl.endsWith(".jpg") ? (
-                        <img src={message.fileUrl} alt="attachment" />
+                  {message?.message?.fileUrl ? (
+                    <a href={message?.fileUrl} target="_blank" rel="noopener noreferrer">
+                      {message.message?.fileUrl?.endsWith(".png") || message?.message?.fileUrl.endsWith(".jpg") ? (
+                        <img src={`http://localhost:5000${message?.message?.fileUrl}`} height = {250} width = {250} alt="attachment" />
                       ) : (
                         "Download File"
                       )}
                     </a>
                   ) : (
-                    <p>{message.message }</p>
+                    <p>{message.message.msg }</p>
                   )}
                 </div>
               </div>

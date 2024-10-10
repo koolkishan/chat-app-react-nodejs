@@ -5,6 +5,7 @@ import { MdAttachFile } from "react-icons/md"; // Import attachment icon
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
 import axios from "axios"; // Import Axios for HTTP requests
+import { useEffect } from "react/cjs/react.production.min";
 
 export default function ChatInput({ handleSendMsg }) {
   const [msg, setMsg] = useState("");
@@ -31,16 +32,13 @@ export default function ChatInput({ handleSendMsg }) {
     let messageData =  {msg} ; // Initialize the message data
 
     // Send file if exists
-    if (file || msg) {
+    if (file) {
       const formData = new FormData();
-      if(file){
-        formData.append("file", file); // Append the selected file to formData
-        console.log(file)
-      }
-      formData.append("msg", msg? msg: 'sent a file');
+      
+      formData.append("file", file);
 
       try {
-        const res = await axios.post("http://localhost:5000/api/messages/addmsg", formData, {
+        const res = await axios.post("http://127.0.0.1:5000/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -49,9 +47,8 @@ export default function ChatInput({ handleSendMsg }) {
         const fileData = res.data;
         console.log("File uploaded successfully: ", fileData);
 
-        // Include file URL in the message data
         messageData.fileUrl = fileData.filePath;
-        setFile(null); // Clear the file after sending
+        setFile(null);
       } catch (err) {
         console.error("File upload failed: ", err);
       }
@@ -75,7 +72,7 @@ export default function ChatInput({ handleSendMsg }) {
       <form className="input-container" onSubmit={(event) => sendChat(event)}>
         <input
           type="text"
-          placeholder="type your message here"
+          placeholder={file ? "File selected" : "Type a message"}
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
         />
@@ -97,18 +94,19 @@ export default function ChatInput({ handleSendMsg }) {
 }
 
  export function ChatMessage({ message }) {
+
   return (
     <div className="chat-message">
-      <p>{message.msg}</p>
-      {message.fileUrl && (
+      <p>{message?.msg || "Hrllo"}</p>
+      {message?.fileUrl && (
         <div className="file-attachment">
           {/* Render the file URL */}
-          <a href={`http://localhost:5000${message.fileUrl}`} target="_blank" rel="noopener noreferrer">
-            {message.fileUrl.endsWith(".png") || message.fileUrl.endsWith(".jpg") ? (
-              <img src={`http://localhost:5000${message.fileUrl}`} alt="attachment" />
+          <a href={`http://localhost:5000${message?.fileUrl}`} target="_blank" rel="noopener noreferrer">
+            {/* {message?.fileUrl?.endsWith(".png") || message?.fileUrl?.endsWith(".jpg") ? (
+              <img src={`http://localhost:5000${message?.fileUrl}`} alt="attachment" />
             ) : (
               "Download File"
-            )}
+            )} */}
           </a>
         </div>
       )}

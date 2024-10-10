@@ -5,24 +5,26 @@ const authRoutes = require("./routes/auth");
 const messageRoutes = require("./routes/messages");
 const app = express();
 const socket = require("socket.io");
+const upload = require("./controllers/multerContorller");
 require("dotenv").config();
 
 
+app.use(cors());
 
 
 
 
 
 // Endpoint to handle file uploads
-// app.post("/upload", upload.single("file"), (req, res) => {
-//   if (!req.file) {
-//     return res.status(400).send("No file uploaded.");
-//   }
-//   res.send({
-//     fileName: req.file.filename,
-//     filePath: `/uploads/${req.file.filename}`,
-//   });
-// });
+app.post("/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
+  }
+  res.json({
+    fileName: req.file.filename,
+    filePath: `/uploads/${req.file.filename}`,
+  });
+});
 
 // Serve static files (the uploaded files will be served here)
 app.use("/uploads", express.static("uploads"));
@@ -33,7 +35,6 @@ app.use("/uploads", express.static("uploads"));
 
 
 
-app.use(cors());
 app.use(express.json());
 
 mongoose
