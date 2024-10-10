@@ -13,7 +13,10 @@ module.exports.getMessages = async (req, res, next) => {
     const projectedMessages = messages.map((msg) => {
       return {
         fromSelf: msg.sender.toString() === from,
-        message: msg.message.text,
+        message: {
+          msg: msg.message.text,
+          fileUrl: msg.fileUrl,
+        }
       };
     });
     res.json(projectedMessages);
@@ -25,11 +28,27 @@ module.exports.getMessages = async (req, res, next) => {
 module.exports.addMessage = async (req, res, next) => {
   try {
     const { from, to, message } = req.body;
-    const data = await Messages.create({
-      message: { text: message },
-      users: [from, to],
-      sender: from,
-    });
+    let data;
+    console.log(message.fileUrl)
+    if(!message.fileUrl){
+       data = await Messages.create({
+        message: { text: message.msg },
+        users: [from, to],
+        sender: from,
+        
+      });
+      
+    }
+    else{
+
+       data = await Messages.create({
+        message: { text: message.msg || "File" },
+        users: [from, to],
+        sender: from,
+        fileUrl: message.fileUrl
+        
+      });
+    }
 
     if (data) return res.json({ msg: "Message added successfully." });
     else return res.json({ msg: "Failed to add message to the database" });

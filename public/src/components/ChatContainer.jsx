@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import ChatInput from "./ChatInput";
+import ChatInput, { ChatMessage } from "./ChatInput";
 import Logout from "./Logout";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import { sendMessageRoute, recieveMessageRoute, sendFileRoute } from "../utils/APIRoutes"; // Add your file route
 
 export default function ChatContainer({ currentChat, socket }) {
   const [messages, setMessages] = useState([]);
@@ -20,6 +20,7 @@ export default function ChatContainer({ currentChat, socket }) {
       to: currentChat._id,
     });
     setMessages(response.data);
+    console.log(response.data);
   }, [currentChat]);
 
   useEffect(() => {
@@ -33,24 +34,55 @@ export default function ChatContainer({ currentChat, socket }) {
     getCurrentChat();
   }, [currentChat]);
 
-  const handleSendMsg = async (msg) => {
+  const handleSendMsg = async (message) => {
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
     socket.current.emit("send-msg", {
       to: currentChat._id,
       from: data._id,
-      msg,
+      message,
     });
     await axios.post(sendMessageRoute, {
       from: data._id,
       to: currentChat._id,
-      message: msg,
+      message: message,
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
+    msgs.push({ fromSelf: true, message: message });
     setMessages(msgs);
+  };
+
+  // New function to handle file sending
+  const handleSendFile = async (file) => {
+    const data = await JSON.parse(
+      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+    );
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("from", data._id);
+    formData.append("to", currentChat._id);
+
+    try {
+      const response = await axios.post(sendFileRoute, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const fileMessage = {
+        fromSelf: true,
+        message: response.data.message, // The file URL sent from the server
+        fileUrl: response.data.fileUrl, // URL to the uploaded file
+      };
+
+      const msgs = [...messages];
+      msgs.push(fileMessage);
+      setMessages(msgs);
+    } catch (error) {
+      console.error("Error uploading file", error);
+    }
   };
 
   useEffect(() => {
@@ -86,7 +118,7 @@ export default function ChatContainer({ currentChat, socket }) {
         <Logout />
       </div>
       <div className="chat-messages">
-        {messages.map((message) => {
+      {messages.map((message) => {
           return (
             <div ref={scrollRef} key={uuidv4()}>
               <div
@@ -95,14 +127,24 @@ export default function ChatContainer({ currentChat, socket }) {
                 }`}
               >
                 <div className="content ">
-                  <p>{message.message}</p>
+                  {message?.message?.fileUrl ? (
+                    <a href={message?.fileUrl} target="_blank" rel="noopener noreferrer">
+                      {message.message?.fileUrl?.endsWith(".png") || message?.message?.fileUrl.endsWith(".jpg") ? (
+                        <img src={`http://localhost:5000${message?.message?.fileUrl}`} height = {250} width = {250} alt="attachment" />
+                      ) : (
+                        "Download File"
+                      )}
+                    </a>
+                  ) : (
+                    <p>{message.message.msg }</p>
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-      <ChatInput handleSendMsg={handleSendMsg} />
+      <ChatInput handleSendMsg={handleSendMsg} handleSendFile={handleSendFile} />
     </Container>
   );
 }
