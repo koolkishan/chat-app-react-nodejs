@@ -7,6 +7,23 @@ import SetAvatar from "./components/SetAvatar";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+// app.js or server.js
+const express = require('express');
+const loggerMiddleware = require('./loggerMiddleware'); // Import the middleware
+
+const app = express();
+
+app.use(loggerMiddleware); // Use the middleware for all routes
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
 export default function App() {
   return (
     <BrowserRouter>
