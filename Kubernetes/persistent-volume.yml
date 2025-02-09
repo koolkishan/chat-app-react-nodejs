@@ -8,6 +8,8 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
   hostPath:
     path: /data/db
 ---
@@ -22,3 +24,4 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  storageClassName: standard

@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: mongodb
+    type: NodePort
     spec:
       containers:
         - name: mongodb
